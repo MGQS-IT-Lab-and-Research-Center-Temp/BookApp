@@ -1,0 +1,124 @@
+﻿using AspNetCoreHero.ToastNotification.Abstractions;
+using BookApp.ActionFilters;
+using BookApp.Models.Auth;
+using BookApp.Service.Interface;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
+
+namespace BookApp.Controllers;
+
+public class HomeController : Controller
+{
+    private readonly IUserService _userService;
+    private readonly IBookService _bookService;
+    private readonly INotyfService _notyf;
+
+    public HomeController(
+        IUserService userService,
+        IBookService bookService,
+        INotyfService notyf)
+    {
+        _userService = userService;
+        _bookService = bookService;
+        _notyf = notyf;
+    }
+
+    [Authorize]
+    public async Task<IActionResult> Index()
+    {
+        var books = await _bookService.DisplayBook();
+        ViewData["Message"] = books.Message;
+        ViewData["Status"] = books.Status;
+
+        return View(books.Data);
+    }
+
+    public IActionResult SignUp()
+    {
+        return View();
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> SignUp(SignUpViewModel model)
+    {
+        var response = await _userService.Register(model);
+
+        if (response.Status is false)
+        {
+            _notyf.Error(response.Message);
+
+            return View(model);
+        }
+
+        _notyf.Success(response.Message);
+
+        return RedirectToAction("Index", "Home");
+    }
+
+    [RedirectIfAuthenticated]
+    public IActionResult Login()
+    {
+        return View();
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> Login(LoginViewModel model)
+    {
+        var response = await _userService.Login(model);
+        var user = response.Data;
+
+        if (response.Status == false)
+        {
+            _notyf.Error(response.Message);
+
+            return View();
+        }
+
+        var claims = new List<Claim>
+        {
+            new Claim(ClaimTypes.Name, user.UserName),
+            new Claim(ClaimTypes.GivenName, user.UserName),
+            new Claim(ClaimTypes.NameIdentifier, user.Id),
+            new Claim(ClaimTypes.Email, user.Email),
+            new Claim(ClaimTypes.Role, user.RoleName),
+        };
+
+        var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+
+        var authenticationProperties = new AuthenticationProperties();
+
+        var principal = new ClaimsPrincipal(claimsIdentity);
+
+        await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal, authenticationProperties);
+
+        _notyf.Success(response.Message);
+
+        if (user.RoleName == "Admin")
+        {
+            return RedirectToAction("AdminDashboard", "Home");
+        }
+
+        return RedirectToAction("Index", "Home");
+    }
+
+    public IActionResult LogOut()
+    {
+        HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+        _notyf.Success("You have successfully signed out!");
+        return RedirectToAction("Login", "Home");
+    }
+
+    [Authorize(Roles = "Admin")]
+    public IActionResult AdminDashboard()
+    {
+        return View();
+    }
+
+    public IActionResult Privacy()
+    {
+        return View();
+    }
+}

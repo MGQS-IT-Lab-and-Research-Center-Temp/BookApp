@@ -1,0 +1,67 @@
+﻿@using System.Security.Claims;
+@model List<BookApp.Models.Book.BookViewModel>
+
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+@await Html.PartialAsync("_ListAlert", Model)
+
+@if (Model is not null)
+{
+    @foreach (var book in Model)
+    {
+        <h4>@book.BookText</h4>
+
+        <div>
+            <button type="button" class="btn btn-warning btn-sm">
+                By @book.UserName
+            </button>
+
+            <button type="button" class="btn btn-primary btn-sm">
+                Comments
+                <span class="badge rounded-pill bg-danger">
+                    @book.Comments.Count
+                    <span class="visually-hidden">Comments Count</span>
+                </span>
+            </button>
+
+            <a asp-controller="Comment" asp-action="Create" asp-route-id="@book.Id" class="btn btn-success btn-sm">
+                Add Comment
+            </a>
+
+            @if (book.UserId != User.Claims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier)?.Value || User.IsInRole("Admin"))
+            {
+                <a asp-controller="BookReport" asp-action="ReportBook" asp-route-id="@book.Id" class="btn btn-danger btn-sm">
+                    Report Book
+                </a>
+            }
+        </div>
+
+        @if (book.Comments.Count == 0)
+        {
+            <p>Be the first to comment on this</p>
+        }
+
+        @if (book.Comments.Count != 0)
+        {
+            <div class="card mt-3 mb-3">
+                <div class="card-header bg-light">
+                    Comments:
+                </div>
+                <ul class="list-group list-group-flush">
+
+                    @foreach (var comment in book.Comments)
+                    {
+                        <li class="list-group-item">
+                            @comment.CommentText
+                            <span class="badge bg-secondary">@comment.UserName</span>
+                            <a asp-controller="CommentReport" asp-action="CreateCommentReport" asp-route-id="@comment.Id">Report comment</a>
+                        </li>
+                    }
+                </ul>
+            </div>
+        }
+    }
+}
+

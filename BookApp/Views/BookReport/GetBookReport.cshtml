@@ -1,0 +1,33 @@
+﻿@model BookApp.Models.BookReport.BookReportViewModel
+@{
+    ViewData["Title"] = "Book Report Detail";
+}
+
+<h3 class="card-title">
+    @ViewData["Title"]
+</h3>
+
+<div class="card-body">
+    <dl class="row">
+        <dt class="col-sm-4">AdditionalComment</dt>
+        <dd class="col-sm-8">@Model.AdditionalComment</dd>
+        <dt class="col-sm-4">FlagNames</dt>
+        <dt class="col-sm-8">
+            @foreach (var flag in Model.FlagNames)
+            {
+                <i class="badge bg-dark">@flag</i>
+            }
+        </dt>
+    </dl>
+
+    @* <a class="btn btn-success" asp-action="UpdateQuestionReport" asp-controller="QuestionReport" asp-route-id="@Model.Id">update</a>
+
+    &nbsp;
+    <a class="btn btn-primary" asp-action="Index" asp-controller="QuestionReport">Back to List</a>
+    &nbsp;
+    <hr />
+    <form asp-action="DeleteQuestionReport" asp-controller="QuestionReport" asp-route-id="@Model.Id">
+    <button type="submit" class="btn btn-danger">Delete</button>
+    </form>*@
+    <a asp-controller="BookReport" asp-action="GetBookReports" asp-route-id="@Model.BookId" class="btn btn-success">Back</a>
+</div>

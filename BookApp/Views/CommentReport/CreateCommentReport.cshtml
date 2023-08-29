@@ -1,0 +1,49 @@
+﻿@model BookApp.Models.CommentReport.CreateCommentReportViewModel
+
+@{
+    ViewData["Title"] = "Report Comment";
+    var commentId = ViewContext.RouteData.Values["id"];
+}
+
+@section Styles {
+    @{
+        await Html.RenderPartialAsync("_Select2CssPartial");
+    }
+}
+
+<div class="body">
+
+    @await Html.PartialAsync("_NoModelAlert")
+
+    <div class="row">
+        <div class="col-md-6">
+            <form asp-action="CreateCommentReport" asp-controller="CommentReport">
+                <input type="hidden" class="form-control" name="CommentId" value="@commentId" />
+
+                <div class="col-md-12 mb-3">
+                    <select type="checkbox" class="form-control" multiple="multiple"
+                            name="FlagIds" required="required"
+                            asp-items="@ViewBag.FlagLists"
+                            data-placeholder="Select Flag">
+                    </select>
+                </div>
+
+                <div class="col-md-12 mb-3">
+                    <label asp-for="AdditionalComment" class="control-label"></label>
+                    <textarea asp-for="AdditionalComment" class="form-control"></textarea>
+                    <span asp-validation-for="AdditionalComment" class="text-danger"></span>
+                </div>
+
+                <div class="col-md-12">
+                    <button type="submit" class="btn btn-primary">Report Comment</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_Select2JsPartial");
+    }
+}

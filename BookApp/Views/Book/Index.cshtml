@@ -1,0 +1,50 @@
+﻿@model List<BookApp.Models.Book.BookViewModel>
+
+@{
+    ViewData["Title"] = "Book List";
+    int count = 1;
+}
+
+@await Html.PartialAsync("_ListAlert", Model)
+
+@if (Model is not null)
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">#</th>
+                @if (User.IsInRole("Admin"))
+                {
+                    <th scope="col">Username</th>
+                }
+                <th scope="col">Book</th>
+                <th scope="col">Action</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td scope="row">@count</td>
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <td scope="row">@item.UserName</td>
+                    }
+                    <td scope="row">@item.BookText</td>
+                    <td scope="row">
+                        <div class="btn-group">
+                            <a asp-controller="Book" asp-action="GetBookDetail" asp-route-id="@item.Id" class="btn btn-info btn-sm text-white">View Book</a>
+
+                            <a asp-controller="BookReport" asp-action="GetBookReports" asp-route-id="@item.Id" class="btn btn-danger btn-sm text-white">View Reports <span class="badge bg-dark">@item.BookReports.Count</span></a>
+                        </div>
+                    </td>
+                </tr>
+                count++;
+            }
+        </tbody>
+    </table>
+}
+
+
+

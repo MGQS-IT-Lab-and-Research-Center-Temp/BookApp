@@ -1,0 +1,41 @@
+﻿@model List<BookApp.Models.BookReport.BookReportViewModel>
+@{
+    ViewData["Title"] = "Report List";
+    int count = 1;
+    var status = ViewBag.Status == false ? false : true;
+}
+
+ @await Html.PartialAsync("_ListAlert", Model)
+
+@if (status is false)
+{
+    <span>@ViewBag.Message</span>
+    return;
+}
+<table class="table">
+     <thead>
+          <tr>
+               <th scope="col">#</th>
+               <th scope="col">AdditionalComment</th>
+               <th scope="col">Action</th>
+          </tr>
+     </thead>
+
+     <tbody>
+
+        @foreach (var item in Model)
+        {
+              <tr>
+                   <th scope="row">@count</th>
+                   <td>@item.AdditionalComment</td>
+                   <td>
+                        <div class="btn-group">
+                        <a asp-controller="BookReport" asp-action="GetBookReport" asp-route-id="@item.Id" class="btn btn-primary">View Reports</a>
+                        </div>
+                   </td>
+              </tr>
+            count++;
+        }
+     </tbody>
+</table>
+
